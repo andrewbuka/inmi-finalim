@@ -1,0 +1,41 @@
+.order-form-box {
+    padding: 30px 0;
+}
+.order-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.order-form {
+    width: 95%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.input-info-box {
+    margin-bottom: 20px;
+}
+.delivery-box {
+    margin-bottom: 20px;
+}
+.paing-box {
+    margin-bottom: 20px;
+}
+.middle-container-order {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.order-sumbit {
+    width: 200px;
+    background-color: #246e49;
+    color: #fff;
+    border: none;
+    font-size: 16px;
+    transition: all 100ms;
+     margin-bottom: 20px;
+    
+
+}
+.order-sumbit:hover {
+    opacity: 0.8;
+}
