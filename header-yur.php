@@ -2,15 +2,15 @@
 <html lang="ru">
 <head>
 	<meta charset="UTF-8">
-	<title>SugarSite</title>
+	<title><?php echo esc_html( inmi_get_seo_context()['title'] ); ?></title>
 
     <?php wp_head() ?>
 	<!-- =================== META =================== -->
-	<meta name="keywords" content="">
-	<meta name="description" content="">
+	<?php inmi_print_seo_meta(); ?>
 	<meta name="format-detection" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<link rel="shortcut icon" href="assets/img/sgr.png">
+	<link rel="shortcut icon" href="<?php echo esc_url( get_template_directory_uri() . '/assets/img/favicon.png' ); ?>">
+	<?php inmi_print_structured_data(); ?>
 	<!-- =================== STYLE =================== -->
 	
 </head>

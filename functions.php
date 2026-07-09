@@ -97,7 +97,7 @@
 
     add_theme_support( 'post-thumbnails');
     add_theme_support( 'custom-logo');
-    add_theme_support( 'title-tag');
+    // Title tags are rendered in header templates to keep SEO titles consistent with custom metadata.
 
 
 
@@ -208,5 +208,152 @@ function inmi_send_order() {
     wp_send_json_success( array( 'message' => 'Спасибо! Ваш заказ успешно отправлен.' ) );
 }
 
+
+function inmi_get_seo_context() {
+    $site_name = 'INMI — Институт микробиологии НАН Беларуси';
+    $default_description = 'Биопрепараты и микробиологические решения INMI для сельского хозяйства, очистки стоков, септиков, кормов, растений и профессионального применения.';
+    $title = $GLOBALS['inmi_custom_title'] ?? '';
+    $description = $GLOBALS['inmi_custom_description'] ?? '';
+
+    $template_slug = is_page() ? basename( (string) get_page_template_slug( get_queried_object_id() ) ) : '';
+    $seo_presets = array(
+        'home.php' => array(
+            'title' => 'Биопрепараты INMI для сельского хозяйства, дома и бизнеса',
+            'description' => 'Каталог биопрепаратов INMI для растений, септиков, сточных вод, кормов и профессионального применения от Института микробиологии НАН Беларуси.',
+        ),
+        'yur-page.php' => array(
+            'title' => 'Биопрепараты для юридических лиц и агробизнеса | INMI',
+            'description' => 'Профессиональные микробиологические препараты INMI для растениеводства, животноводства, очистки стоков и производственных задач юридических лиц.',
+        ),
+        'basket.php' => array(
+            'title' => 'Корзина и оформление заказа биопрепаратов | INMI',
+            'description' => 'Проверьте выбранные биопрепараты INMI, укажите контакты и отправьте заявку на оформление заказа.',
+        ),
+        'requisites.php' => array(
+            'title' => 'Реквизиты Института микробиологии НАН Беларуси | INMI',
+            'description' => 'Юридические и платежные реквизиты Института микробиологии НАН Беларуси для оформления документов и сотрудничества.',
+        ),
+        'how-buing.php' => array(
+            'title' => 'Как купить биопрепараты INMI: заказ, оплата и доставка',
+            'description' => 'Пошаговая инструкция по покупке биопрепаратов INMI: выбор товара, оформление заявки, согласование оплаты и доставки.',
+        ),
+        'payment.php' => array(
+            'title' => 'Оплата биопрепаратов INMI онлайн и по счету',
+            'description' => 'Доступные способы оплаты заказов INMI для физических и юридических лиц, условия подтверждения и сопровождения покупки.',
+        ),
+        'inmi-knowledge.php' => array(
+            'title' => 'InMi-знания: статьи о биопрепаратах и микробиологии | INMI',
+            'description' => 'Практические материалы INMI о применении биопрепаратов в растениеводстве, животноводстве, септиках, сточных водах и обслуживании хозяйств.',
+        ),
+    );
+
+    if ( isset( $seo_presets[ $template_slug ] ) ) {
+        $title = $GLOBALS['inmi_custom_title'] ?? $seo_presets[ $template_slug ]['title'];
+        $description = $GLOBALS['inmi_custom_description'] ?? $seo_presets[ $template_slug ]['description'];
+    }
+
+    if ( empty( $title ) ) {
+        if ( is_front_page() || is_home() ) {
+            $title = 'Биопрепараты INMI для сельского хозяйства, дома и бизнеса';
+        } elseif ( is_page() || is_single() ) {
+            $title = wp_strip_all_tags( get_the_title() ) . ' | INMI';
+        } else {
+            $title = $site_name;
+        }
+    }
+
+    if ( empty( $description ) ) {
+        if ( is_page() || is_single() ) {
+            $description = wp_strip_all_tags( get_the_excerpt() );
+        }
+
+        if ( empty( $description ) ) {
+            $description = $default_description;
+        }
+    }
+
+    $description = wp_trim_words( $description, 28, '' );
+    $canonical = is_singular() ? get_permalink() : home_url( add_query_arg( array(), $GLOBALS['wp']->request ?? '' ) );
+    $image = get_the_post_thumbnail_url( get_the_ID(), 'large' );
+
+    if ( empty( $image ) ) {
+        $image = get_template_directory_uri() . '/assets/img/logo.svg';
+    }
+
+    return array(
+        'site_name' => $site_name,
+        'title' => $title,
+        'description' => $description,
+        'canonical' => $canonical,
+        'image' => $image,
+        'type' => ( is_single() || is_page() ) ? 'article' : 'website',
+    );
+}
+
+function inmi_print_seo_meta() {
+    $seo = inmi_get_seo_context();
+    ?>
+    <meta name="description" content="<?php echo esc_attr( $seo['description'] ); ?>">
+    <link rel="canonical" href="<?php echo esc_url( $seo['canonical'] ); ?>">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:type" content="<?php echo esc_attr( $seo['type'] ); ?>">
+    <meta property="og:site_name" content="<?php echo esc_attr( $seo['site_name'] ); ?>">
+    <meta property="og:title" content="<?php echo esc_attr( $seo['title'] ); ?>">
+    <meta property="og:description" content="<?php echo esc_attr( $seo['description'] ); ?>">
+    <meta property="og:url" content="<?php echo esc_url( $seo['canonical'] ); ?>">
+    <meta property="og:image" content="<?php echo esc_url( $seo['image'] ); ?>">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?php echo esc_attr( $seo['title'] ); ?>">
+    <meta name="twitter:description" content="<?php echo esc_attr( $seo['description'] ); ?>">
+    <meta name="twitter:image" content="<?php echo esc_url( $seo['image'] ); ?>">
+    <?php
+}
+
+function inmi_print_structured_data() {
+    $seo = inmi_get_seo_context();
+    $schema = array(
+        '@context' => 'https://schema.org',
+        '@graph' => array(
+            array(
+                '@type' => 'Organization',
+                '@id' => home_url( '/#organization' ),
+                'name' => 'Институт микробиологии НАН Беларуси',
+                'url' => home_url( '/' ),
+                'email' => 'inmisale@mail.ru',
+                'telephone' => '+375447507890',
+                'logo' => get_template_directory_uri() . '/assets/img/logo.svg',
+                'address' => array(
+                    '@type' => 'PostalAddress',
+                    'streetAddress' => 'ул. Купревича, 2',
+                    'addressLocality' => 'Минск',
+                    'postalCode' => '220084',
+                    'addressCountry' => 'BY',
+                ),
+            ),
+            array(
+                '@type' => 'WebSite',
+                '@id' => home_url( '/#website' ),
+                'url' => home_url( '/' ),
+                'name' => $seo['site_name'],
+                'inLanguage' => 'ru-RU',
+                'publisher' => array( '@id' => home_url( '/#organization' ) ),
+            ),
+            array(
+                '@type' => is_front_page() ? 'WebPage' : 'Article',
+                '@id' => $seo['canonical'] . '#webpage',
+                'url' => $seo['canonical'],
+                'name' => $seo['title'],
+                'description' => $seo['description'],
+                'inLanguage' => 'ru-RU',
+                'isPartOf' => array( '@id' => home_url( '/#website' ) ),
+                'publisher' => array( '@id' => home_url( '/#organization' ) ),
+            ),
+        ),
+    );
+    ?>
+    <script type="application/ld+json"><?php echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); ?></script>
+    <?php
+}
 
 ?>
